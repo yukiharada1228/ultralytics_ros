@@ -47,7 +47,13 @@ class TrackerNode:
         self.result_boxes = rospy.get_param("~result_boxes", True)
         path = roslib.packages.get_pkg_dir("ultralytics_ros")
         self.model = YOLO(f"{path}/models/{yolo_model}")
-        self.model.fuse()
+        use_world = "world" in yolo_model.lower()
+        if use_world:
+            if self.classes is not None:
+                self.model.set_classes(self.classes)
+            self.classes = None
+        else:
+            self.model.fuse()
         self.sub = rospy.Subscriber(
             self.input_topic,
             Image,
